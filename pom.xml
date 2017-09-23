@@ -9,7 +9,7 @@
 
 	<groupId>com.github.jonasrutishauser.maven.wagon</groupId>
 	<artifactId>wagon-git</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<url>${url}</url>
@@ -173,7 +173,7 @@
 		<connection>${scm.connection}</connection>
 		<developerConnection>${scm.developerConnection}</developerConnection>
 		<url>${scm.url}</url>
-		<tag>v1.0.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<distributionManagement>
