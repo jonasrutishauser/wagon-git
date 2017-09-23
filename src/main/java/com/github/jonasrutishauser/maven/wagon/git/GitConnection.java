@@ -340,7 +340,7 @@ public class GitConnection
 
     private static boolean isAuthenticationFailureMessage( String message )
     {
-        return message.contains( "CredentialsProvider" ) || message.contains( "USERAUTH" );
+        return message.contains( "CredentialsProvider" ) || message.toLowerCase().contains( "auth" );
     }
 
     private static ProgressMonitor getProgressMonitor()
