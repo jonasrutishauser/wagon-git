@@ -1,7 +1,7 @@
 language: java
 jdk:
 - oraclejdk8
-script: mvn -V -e -B clean verify
+script: mvn -V -e clean verify
 after_success:
 - mvn jacoco:report
 - bash <(curl -s https://codecov.io/bash) -c -F unittests
@@ -9,7 +9,7 @@ after_success:
 - bash <(curl -s https://codecov.io/bash) -c -F integration
 deploy:
   provider: script
-  script: cp .travis.settings.xml $HOME/.m2/settings.xml && mvn -e -B site-deploy
+  script: cp .travis.settings.xml $HOME/.m2/settings.xml && mvn -e site-deploy
   skip_cleanup: true
   on:
     branch: master

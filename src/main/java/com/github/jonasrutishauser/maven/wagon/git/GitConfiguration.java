@@ -29,10 +29,10 @@ public class GitConfiguration
 {
 
     /**
-     * URL format: git:[url]((![branch])?!/?[path])?
+     * URL format: git:(//[identifier]/)?[url]((![branch])?!/?[path])?
      */
     private static final Pattern URL_PATTERN =
-        Pattern.compile( "git:(?<url>[^!]+)((!(?<branch>[^!]+))?!/?(?<path>[^!]+)?)?" );
+        Pattern.compile( "git:(//[^/]+/)?(?<url>[^!]+)((!(?<branch>[^!]+))?!/?(?<path>[^!]+)?)?" );
 
     private final String url;
 

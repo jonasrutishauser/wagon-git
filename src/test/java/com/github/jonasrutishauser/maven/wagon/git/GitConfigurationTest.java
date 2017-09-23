@@ -112,6 +112,8 @@ public class GitConfigurationTest
                 url.append( '/' );
                 urls.add( url.toString() );
             }
+            url.insert( 4, "//foo/" );
+            urls.add( url.toString() );
             return urls.stream().map( input -> Arguments.of( input, gitUrl, branch, path ) );
         }
     }
