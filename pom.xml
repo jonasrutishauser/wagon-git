@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.jonasrutishauser</groupId>
 		<artifactId>parent</artifactId>
-		<version>7</version>
+		<version>8</version>
 	</parent>
 
 	<groupId>com.github.jonasrutishauser.maven.wagon</groupId>
@@ -161,7 +161,7 @@
 	<distributionManagement>
 		<site>
 			<id>github</id>
-			<url>git://${project.artifactId}/https://github.com/jonasrutishauser/${project.artifactId}.git!gh-pages!/${site.path}</url>
+			<url>${distributionManagement.site.url}</url>
 		</site>
 	</distributionManagement>
 </project>
