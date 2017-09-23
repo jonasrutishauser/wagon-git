@@ -155,6 +155,16 @@
 							<version>${project.version}</version>
 						</dependency>
 					</dependencies>
+					<configuration>
+						<skipDeploy>false</skipDeploy>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>com.github.github</groupId>
+					<artifactId>site-maven-plugin</artifactId>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
