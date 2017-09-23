@@ -161,7 +161,7 @@
 	<distributionManagement>
 		<site>
 			<id>github</id>
-			<url>${distributionManagement.site.url}</url>
+			<url>git://${project.artifactId}/https://github.com/jonasrutishauser/${project.artifactId}.git!gh-pages!/${site.path}</url>
 		</site>
 	</distributionManagement>
 </project>
