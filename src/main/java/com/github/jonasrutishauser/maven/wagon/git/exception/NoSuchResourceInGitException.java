@@ -17,15 +17,12 @@ package com.github.jonasrutishauser.maven.wagon.git.exception;
  * If not, see <http://www.gnu.org/licenses/lgpl-3.0.txt>.
  */
 
-public class NoSuchResourceInGitException
-    extends GitException
-{
+public class NoSuchResourceInGitException extends GitException {
 
     private static final long serialVersionUID = 1L;
 
-    public NoSuchResourceInGitException( String message )
-    {
-        super( message );
+    public NoSuchResourceInGitException(String message) {
+        super(message);
     }
 
 }

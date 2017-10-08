@@ -44,355 +44,311 @@ import com.github.jonasrutishauser.maven.wagon.git.exception.GitException;
 import com.github.jonasrutishauser.maven.wagon.git.exception.GitPushException;
 import com.github.jonasrutishauser.maven.wagon.git.exception.NoSuchResourceInGitException;
 
-@DisplayName( "GitWagon" )
-public class GitWagonTest
-{
+@DisplayName("GitWagon")
+public class GitWagonTest {
 
     @Test
-    @DisplayName( "openConnectionInternal() opens a GitConnection" )
-    void openConnectionInternal_opensGitConnection()
-    {
-        RuntimeException expectedCall = new RuntimeException( "expectedCall" );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("openConnectionInternal() opens a GitConnection")
+    void openConnectionInternal_opensGitConnection() {
+        RuntimeException expectedCall = new RuntimeException("expectedCall");
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 throw expectedCall;
             }
         };
 
-        RuntimeException exception =
-            assertThrows( RuntimeException.class, () -> testee.connect( new Repository( "foo", "git:test" ) ) );
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> testee.connect(new Repository("foo", "git:test")));
 
-        assertSame( expectedCall, exception );
+        assertSame(expectedCall, exception);
     }
 
     @Test
-    @DisplayName( "openConnectionInternal() with a GitCloneException on GitConnection.open() throws a ConnectionException" )
-    void openConnectionInternal_gitCloneException_throwsConnectionException()
-    {
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("openConnectionInternal() with a GitCloneException on GitConnection.open() throws a ConnectionException")
+    void openConnectionInternal_gitCloneException_throwsConnectionException() {
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
-                throw new GitCloneException( "test", null );
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
+                throw new GitCloneException("test", null);
             }
         };
 
-        assertThrows( ConnectionException.class, () -> testee.connect( new Repository( "foo", "git:test" ) ) );
+        assertThrows(ConnectionException.class, () -> testee.connect(new Repository("foo", "git:test")));
     }
 
     @Test
-    @DisplayName( "openConnectionInternal() with a GitAuthenticationException on GitConnection.open() throws a AuthenticationException" )
-    void openConnectionInternal_gitAuthenticationException_throwsAuthenticationException()
-    {
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("openConnectionInternal() with a GitAuthenticationException on GitConnection.open() throws a AuthenticationException")
+    void openConnectionInternal_gitAuthenticationException_throwsAuthenticationException() {
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
-                throw new GitAuthenticationException( "test", null );
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
+                throw new GitAuthenticationException("test", null);
             }
         };
 
-        assertThrows( AuthenticationException.class, () -> testee.connect( new Repository( "foo", "git:test" ) ) );
+        assertThrows(AuthenticationException.class, () -> testee.connect(new Repository("foo", "git:test")));
     }
 
     @Test
-    @DisplayName( "getIfNewer() calls GitConnection.getIfNewer()" )
-    void getIfNewer_callsGetIfNewerOnGitConnection()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("getIfNewer() calls GitConnection.getIfNewer()")
+    void getIfNewer_callsGetIfNewerOnGitConnection() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        File target = new File( "target" );
-        doReturn( Boolean.TRUE ).when( gitConnection ).getIfNewer( Paths.get( "foo" ), Paths.get( "target" ), 42 );
+        testee.connect(new Repository("foo", "git:test"));
+        File target = new File("target");
+        doReturn(Boolean.TRUE).when(gitConnection).getIfNewer(Paths.get("foo"), Paths.get("target"), 42);
 
-        assertTrue( testee.getIfNewer( "foo", target, 42 ) );
+        assertTrue(testee.getIfNewer("foo", target, 42));
 
-        verify( gitConnection ).getIfNewer( Paths.get( "foo" ), Paths.get( "target" ), 42 );
+        verify(gitConnection).getIfNewer(Paths.get("foo"), Paths.get("target"), 42);
     }
 
     @Test
-    @DisplayName( "getIfNewer() with a NoSuchResourceInGitException on GitConnection.getIfNewer() throws a ResourceDoesNotExistException" )
-    void getIfNewer_noSuchResourceInGitException_throwsResourceDoesNotExistException()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("getIfNewer() with a NoSuchResourceInGitException on GitConnection.getIfNewer() throws a ResourceDoesNotExistException")
+    void getIfNewer_noSuchResourceInGitException_throwsResourceDoesNotExistException() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( NoSuchResourceInGitException.class ).when( gitConnection ).getIfNewer( any(), any(), anyLong() );
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(NoSuchResourceInGitException.class).when(gitConnection).getIfNewer(any(), any(), anyLong());
 
-        assertThrows( ResourceDoesNotExistException.class, () -> testee.getIfNewer( "foo", new File( "target" ), 0 ) );
+        assertThrows(ResourceDoesNotExistException.class, () -> testee.getIfNewer("foo", new File("target"), 0));
     }
 
     @Test
-    @DisplayName( "getIfNewer() with a GitException on GitConnection.getIfNewer() throws a TransferFailedException" )
-    void getIfNewer_gitException_throwsTransferFailedException()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("getIfNewer() with a GitException on GitConnection.getIfNewer() throws a TransferFailedException")
+    void getIfNewer_gitException_throwsTransferFailedException() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( GitException.class ).when( gitConnection ).getIfNewer( any(), any(), anyLong() );
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(GitException.class).when(gitConnection).getIfNewer(any(), any(), anyLong());
 
-        assertThrows( TransferFailedException.class, () -> testee.getIfNewer( "foo", new File( "target" ), 0 ) );
+        assertThrows(TransferFailedException.class, () -> testee.getIfNewer("foo", new File("target"), 0));
     }
 
     @Test
-    @DisplayName( "get() calls GitConnection.getIfNewer()" )
-    void get_callsGetIfNewerOnGitConnection()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("get() calls GitConnection.getIfNewer()")
+    void get_callsGetIfNewerOnGitConnection() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        File target = new File( "target" );
+        testee.connect(new Repository("foo", "git:test"));
+        File target = new File("target");
 
-        testee.get( "foo", target );
+        testee.get("foo", target);
 
-        verify( gitConnection ).getIfNewer( Paths.get( "foo" ), Paths.get( "target" ), Long.MIN_VALUE );
+        verify(gitConnection).getIfNewer(Paths.get("foo"), Paths.get("target"), Long.MIN_VALUE);
     }
 
     @Test
-    @DisplayName( "get() with a NoSuchResourceInGitException on GitConnection.getIfNewer() throws a ResourceDoesNotExistException" )
-    void get_noSuchResourceInGitException_throwsResourceDoesNotExistException()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("get() with a NoSuchResourceInGitException on GitConnection.getIfNewer() throws a ResourceDoesNotExistException")
+    void get_noSuchResourceInGitException_throwsResourceDoesNotExistException() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( NoSuchResourceInGitException.class ).when( gitConnection ).getIfNewer( any(), any(), anyLong() );
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(NoSuchResourceInGitException.class).when(gitConnection).getIfNewer(any(), any(), anyLong());
 
-        assertThrows( ResourceDoesNotExistException.class, () -> testee.get( "foo", new File( "target" ) ) );
+        assertThrows(ResourceDoesNotExistException.class, () -> testee.get("foo", new File("target")));
     }
 
     @Test
-    @DisplayName( "get() with a GitException on GitConnection.getIfNewer() throws a TransferFailedException" )
-    void get_gitException_throwsTransferFailedException()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("get() with a GitException on GitConnection.getIfNewer() throws a TransferFailedException")
+    void get_gitException_throwsTransferFailedException() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( GitException.class ).when( gitConnection ).getIfNewer( any(), any(), anyLong() );
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(GitException.class).when(gitConnection).getIfNewer(any(), any(), anyLong());
 
-        assertThrows( TransferFailedException.class, () -> testee.get( "foo", new File( "target" ) ) );
+        assertThrows(TransferFailedException.class, () -> testee.get("foo", new File("target")));
     }
 
     @Test
-    @DisplayName( "putDirectory() calls GitConnection.put()" )
-    void putDirectory_callsPutOnGitConnection()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("putDirectory() calls GitConnection.put()")
+    void putDirectory_callsPutOnGitConnection() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        File source = new File( "source" );
+        testee.connect(new Repository("foo", "git:test"));
+        File source = new File("source");
 
-        testee.putDirectory( source, "foo" );
+        testee.putDirectory(source, "foo");
 
-        verify( gitConnection ).put( Paths.get( "source" ), Paths.get( "foo" ) );
+        verify(gitConnection).put(Paths.get("source"), Paths.get("foo"));
     }
 
     @Test
-    @DisplayName( "putDirectory() with a GitException on GitConnection.put() throws a TransferFailedException" )
-    void putDirectory_gitException_throwsTransferFailedException()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("putDirectory() with a GitException on GitConnection.put() throws a TransferFailedException")
+    void putDirectory_gitException_throwsTransferFailedException() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( GitException.class ).when( gitConnection ).put( any(), any() );
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(GitException.class).when(gitConnection).put(any(), any());
 
-        assertThrows( TransferFailedException.class, () -> testee.putDirectory( new File( "source" ), "foo" ) );
+        assertThrows(TransferFailedException.class, () -> testee.putDirectory(new File("source"), "foo"));
     }
 
     @Test
-    @DisplayName( "put() calls GitConnection.put()" )
-    void put_callsPutOnGitConnection()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("put() calls GitConnection.put()")
+    void put_callsPutOnGitConnection() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        File source = new File( "source" );
+        testee.connect(new Repository("foo", "git:test"));
+        File source = new File("source");
 
-        testee.put( source, "foo" );
+        testee.put(source, "foo");
 
-        verify( gitConnection ).put( Paths.get( "source" ), Paths.get( "foo" ) );
+        verify(gitConnection).put(Paths.get("source"), Paths.get("foo"));
     }
 
     @Test
-    @DisplayName( "put() with a GitException on GitConnection.put() throws a TransferFailedException" )
-    void put_gitException_throwsTransferFailedException()
-        throws Exception
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+    @DisplayName("put() with a GitException on GitConnection.put() throws a TransferFailedException")
+    void put_gitException_throwsTransferFailedException() throws Exception {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( GitException.class ).when( gitConnection ).put( any(), any() );
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(GitException.class).when(gitConnection).put(any(), any());
 
-        assertThrows( TransferFailedException.class, () -> testee.put( new File( "source" ), "foo" ) );
+        assertThrows(TransferFailedException.class, () -> testee.put(new File("source"), "foo"));
     }
 
     @Test
-    @DisplayName( "closeConnection() calls GitConnection.close()" )
+    @DisplayName("closeConnection() calls GitConnection.close()")
     void closeConnection_callsCloseOnGitConnection()
-        throws ConnectionException, AuthenticationException, GitPushException, GitAuthenticationException
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+            throws ConnectionException, AuthenticationException, GitPushException, GitAuthenticationException {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
+        testee.connect(new Repository("foo", "git:test"));
 
         testee.closeConnection();
 
-        verify( gitConnection ).close();
+        verify(gitConnection).close();
     }
 
     @Test
-    @DisplayName( "closeConnection() with a GitPushException on GitConnection.close() throws a ConnectionException" )
+    @DisplayName("closeConnection() with a GitPushException on GitConnection.close() throws a ConnectionException")
     void closeConnection_gitPushException_throwsConnectionException()
-        throws ConnectionException, AuthenticationException, GitPushException, GitAuthenticationException
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+            throws ConnectionException, AuthenticationException, GitPushException, GitAuthenticationException {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( GitPushException.class ).when( gitConnection ).close();
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(GitPushException.class).when(gitConnection).close();
 
-        assertThrows( ConnectionException.class, () -> testee.closeConnection() );
+        assertThrows(ConnectionException.class, () -> testee.closeConnection());
     }
 
     @Test
-    @DisplayName( "closeConnection() with a GitAuthenticationException on GitConnection.close() throws a ConnectionException" )
+    @DisplayName("closeConnection() with a GitAuthenticationException on GitConnection.close() throws a ConnectionException")
     void closeConnection_gitAuthenticationException_throwsConnectionException()
-        throws ConnectionException, AuthenticationException, GitPushException, GitAuthenticationException
-    {
-        GitConnection gitConnection = mock( GitConnection.class );
-        GitWagon testee = new GitWagon()
-        {
+            throws ConnectionException, AuthenticationException, GitPushException, GitAuthenticationException {
+        GitConnection gitConnection = mock(GitConnection.class);
+        GitWagon testee = new GitWagon() {
+
             @Override
-            protected GitConnection openGitConnection( GitConfiguration configuration )
-                throws GitCloneException, GitAuthenticationException
-            {
+            protected GitConnection openGitConnection(GitConfiguration configuration)
+                    throws GitCloneException, GitAuthenticationException {
                 return gitConnection;
             }
         };
-        testee.connect( new Repository( "foo", "git:test" ) );
-        doThrow( GitAuthenticationException.class ).when( gitConnection ).close();
+        testee.connect(new Repository("foo", "git:test"));
+        doThrow(GitAuthenticationException.class).when(gitConnection).close();
 
-        assertThrows( ConnectionException.class, () -> testee.closeConnection() );
+        assertThrows(ConnectionException.class, () -> testee.closeConnection());
     }
 
     @Test
-    @DisplayName( "supportsDirectoryCopy() returns true" )
-    void supportsDirectoryCopy()
-    {
+    @DisplayName("supportsDirectoryCopy() returns true")
+    void supportsDirectoryCopy() {
         GitWagon testee = new GitWagon();
 
-        assertTrue( testee.supportsDirectoryCopy() );
+        assertTrue(testee.supportsDirectoryCopy());
     }
 
 }

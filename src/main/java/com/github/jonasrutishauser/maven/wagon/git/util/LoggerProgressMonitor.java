@@ -21,59 +21,47 @@ import org.eclipse.jgit.lib.BatchingProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoggerProgressMonitor
-    extends BatchingProgressMonitor
-{
+public class LoggerProgressMonitor extends BatchingProgressMonitor {
 
     private final Logger logger;
 
-    public LoggerProgressMonitor()
-    {
-        this( LoggerFactory.getLogger( LoggerProgressMonitor.class ) );
+    public LoggerProgressMonitor() {
+        this(LoggerFactory.getLogger(LoggerProgressMonitor.class));
     }
 
-    LoggerProgressMonitor( Logger logger )
-    {
+    LoggerProgressMonitor(Logger logger) {
         this.logger = logger;
     }
 
     @Override
-    protected void onUpdate( String taskName, int workCurr )
-    {
-        if ( logger.isDebugEnabled() )
-        {
-            logger.debug( String.format( "%-24s%s", taskName + ": ", Integer.valueOf( workCurr ) ) );
+    protected void onUpdate(String taskName, int workCurr) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%-24s%s", taskName + ": ", Integer.valueOf(workCurr)));
         }
     }
 
     @Override
-    protected void onEndTask( String taskName, int workCurr )
-    {
-        if ( logger.isDebugEnabled() )
-        {
-            logger.debug( String.format( "%-24s%s", taskName + ": ", Integer.valueOf( workCurr ) ) );
+    protected void onEndTask(String taskName, int workCurr) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%-24s%s", taskName + ": ", Integer.valueOf(workCurr)));
         }
     }
 
     @Override
-    protected void onUpdate( String taskName, int workCurr, int workTotal, int percentDone )
-    {
-        if ( logger.isDebugEnabled() && workCurr != workTotal )
-        {
-            String total = String.valueOf( workTotal );
-            logger.debug( String.format( "%-24s%3s%% (%" + total.length() + "s/%s)", taskName + ": ",
-                                         Integer.valueOf( percentDone ), Integer.valueOf( workCurr ), total ) );
+    protected void onUpdate(String taskName, int workCurr, int workTotal, int percentDone) {
+        if (logger.isDebugEnabled() && workCurr != workTotal) {
+            String total = String.valueOf(workTotal);
+            logger.debug(String.format("%-24s%3s%% (%" + total.length() + "s/%s)", taskName + ": ",
+                    Integer.valueOf(percentDone), Integer.valueOf(workCurr), total));
         }
     }
 
     @Override
-    protected void onEndTask( String taskName, int workCurr, int workTotal, int percentDone )
-    {
-        if ( logger.isDebugEnabled() )
-        {
-            String total = String.valueOf( workTotal );
-            logger.debug( String.format( "%-24s%3s%% (%" + total.length() + "s/%s)", taskName + ": ",
-                                         Integer.valueOf( percentDone ), Integer.valueOf( workCurr ), total ) );
+    protected void onEndTask(String taskName, int workCurr, int workTotal, int percentDone) {
+        if (logger.isDebugEnabled()) {
+            String total = String.valueOf(workTotal);
+            logger.debug(String.format("%-24s%3s%% (%" + total.length() + "s/%s)", taskName + ": ",
+                    Integer.valueOf(percentDone), Integer.valueOf(workCurr), total));
         }
     }
 

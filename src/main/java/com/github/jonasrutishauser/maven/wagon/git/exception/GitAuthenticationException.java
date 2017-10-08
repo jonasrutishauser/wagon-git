@@ -17,15 +17,12 @@ package com.github.jonasrutishauser.maven.wagon.git.exception;
  * If not, see <http://www.gnu.org/licenses/lgpl-3.0.txt>.
  */
 
-public class GitAuthenticationException
-    extends GitException
-{
+public class GitAuthenticationException extends GitException {
 
     private static final long serialVersionUID = 1L;
 
-    public GitAuthenticationException( String message, Throwable cause )
-    {
-        super( message, cause );
+    public GitAuthenticationException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

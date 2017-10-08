@@ -37,109 +37,95 @@ import io.takari.maven.testing.executor.MavenRuntime.MavenRuntimeBuilder;
 import io.takari.maven.testing.executor.MavenVersions;
 import io.takari.maven.testing.executor.junit.MavenJUnitTestRunner;
 
-@RunWith( MavenJUnitTestRunner.class )
-@MavenVersions( { "3.3.3", "3.3.9", "3.5.0" } )
-public class GitWagonIT
-{
+@RunWith(MavenJUnitTestRunner.class)
+@MavenVersions({"3.3.3", "3.3.9", "3.5.0"})
+public class GitWagonIT {
 
     @Rule
     public final TestResources resources = new TestResources();
 
     public final MavenRuntime mavenRuntime;
 
-    public GitWagonIT( MavenRuntimeBuilder builder )
-        throws Exception
-    {
-        this.mavenRuntime = builder.withCliOptions( "-X" ).build();
+    public GitWagonIT(MavenRuntimeBuilder builder) throws Exception {
+        this.mavenRuntime = builder.withCliOptions("-X").build();
     }
 
     @Test
-    public void siteDeploySimpleUrl()
-        throws Exception
-    {
-        File basedir = resources.getBasedir( "site" );
-        File repo = createRemoteRepo( basedir );
+    public void siteDeploySimpleUrl() throws Exception {
+        File basedir = resources.getBasedir("site");
+        File repo = createRemoteRepo(basedir);
 
-        MavenExecutionResult result = mavenRuntime.forProject( basedir ).withCliOption( "-Dsite.url=git:" + repo.toURI()
-            + "!/" ).execute( "clean", "site-deploy" );
+        MavenExecutionResult result = mavenRuntime.forProject(basedir)
+                .withCliOption("-Dsite.url=git:" + repo.toURI() + "!/").execute("clean", "site-deploy");
 
         result.assertErrorFreeLog();
-        assertTrue( new File( repo, "refs/heads/master" ).exists() );
-        File clone = cloneRemoteRepo( basedir, repo, "master" );
-        assertTrue( new File( clone, "index.html" ).exists() );
-        assertTrue( new File( clone, "site-sub/index.html" ).exists() );
+        assertTrue(new File(repo, "refs/heads/master").exists());
+        File clone = cloneRemoteRepo(basedir, repo, "master");
+        assertTrue(new File(clone, "index.html").exists());
+        assertTrue(new File(clone, "site-sub/index.html").exists());
     }
 
     @Test
-    public void siteDeployUrlWithDirectory()
-        throws Exception
-    {
-        File basedir = resources.getBasedir( "site" );
-        File repo = createRemoteRepo( basedir );
+    public void siteDeployUrlWithDirectory() throws Exception {
+        File basedir = resources.getBasedir("site");
+        File repo = createRemoteRepo(basedir);
 
-        MavenExecutionResult result = mavenRuntime.forProject( basedir ).withCliOption( "-Dsite.url=git:" + repo.toURI()
-            + "!test/" ).execute( "clean", "site-deploy" );
+        MavenExecutionResult result = mavenRuntime.forProject(basedir)
+                .withCliOption("-Dsite.url=git:" + repo.toURI() + "!test/").execute("clean", "site-deploy");
 
         result.assertErrorFreeLog();
-        assertTrue( new File( repo, "refs/heads/master" ).exists() );
-        File clone = cloneRemoteRepo( basedir, repo, "master" );
-        assertTrue( new File( clone, "test/index.html" ).exists() );
-        assertTrue( new File( clone, "test/site-sub/index.html" ).exists() );
+        assertTrue(new File(repo, "refs/heads/master").exists());
+        File clone = cloneRemoteRepo(basedir, repo, "master");
+        assertTrue(new File(clone, "test/index.html").exists());
+        assertTrue(new File(clone, "test/site-sub/index.html").exists());
     }
 
     @Test
-    public void siteDeployUrlWithBranch()
-        throws Exception
-    {
-        File basedir = resources.getBasedir( "site" );
-        File repo = createRemoteRepo( basedir );
+    public void siteDeployUrlWithBranch() throws Exception {
+        File basedir = resources.getBasedir("site");
+        File repo = createRemoteRepo(basedir);
 
-        MavenExecutionResult result = mavenRuntime.forProject( basedir ).withCliOption( "-Dsite.url=git:" + repo.toURI()
-            + "!gh-pages!/" ).execute( "clean", "site-deploy" );
+        MavenExecutionResult result = mavenRuntime.forProject(basedir)
+                .withCliOption("-Dsite.url=git:" + repo.toURI() + "!gh-pages!/").execute("clean", "site-deploy");
 
         result.assertErrorFreeLog();
-        assertTrue( new File( repo, "refs/heads/gh-pages" ).exists() );
-        File clone = cloneRemoteRepo( basedir, repo, "gh-pages" );
-        assertTrue( new File( clone, "index.html" ).exists() );
-        assertTrue( new File( clone, "site-sub/index.html" ).exists() );
+        assertTrue(new File(repo, "refs/heads/gh-pages").exists());
+        File clone = cloneRemoteRepo(basedir, repo, "gh-pages");
+        assertTrue(new File(clone, "index.html").exists());
+        assertTrue(new File(clone, "site-sub/index.html").exists());
     }
 
     @Test
-    public void siteDeployUrlWithBranchAndDirectory()
-        throws Exception
-    {
-        File basedir = resources.getBasedir( "site" );
-        File repo = createRemoteRepo( basedir );
+    public void siteDeployUrlWithBranchAndDirectory() throws Exception {
+        File basedir = resources.getBasedir("site");
+        File repo = createRemoteRepo(basedir);
 
-        MavenExecutionResult result = mavenRuntime.forProject( basedir ).withCliOption( "-Dsite.url=git:" + repo.toURI()
-            + "!gh-pages!/some/dir/" ).execute( "clean", "site-deploy" );
+        MavenExecutionResult result = mavenRuntime.forProject(basedir)
+                .withCliOption("-Dsite.url=git:" + repo.toURI() + "!gh-pages!/some/dir/")
+                .execute("clean", "site-deploy");
 
         result.assertErrorFreeLog();
-        assertTrue( new File( repo, "refs/heads/gh-pages" ).exists() );
-        File clone = cloneRemoteRepo( basedir, repo, "gh-pages" );
-        assertTrue( new File( clone, "some/dir/index.html" ).exists() );
-        assertTrue( new File( clone, "some/dir/site-sub/index.html" ).exists() );
+        assertTrue(new File(repo, "refs/heads/gh-pages").exists());
+        File clone = cloneRemoteRepo(basedir, repo, "gh-pages");
+        assertTrue(new File(clone, "some/dir/index.html").exists());
+        assertTrue(new File(clone, "some/dir/site-sub/index.html").exists());
     }
 
-    private File cloneRemoteRepo( File basedir, File repo, String branch )
-        throws ExecuteException, IOException
-    {
-        File clone = new File( basedir, "clone" );
+    private File cloneRemoteRepo(File basedir, File repo, String branch) throws ExecuteException, IOException {
+        File clone = new File(basedir, "clone");
         clone.mkdir();
         Executor executor = new DefaultExecutor();
-        executor.setWorkingDirectory( clone );
-        executor.execute( CommandLine.parse( "git clone -b " + branch + " " + repo.getAbsolutePath() + " ./" ) );
+        executor.setWorkingDirectory(clone);
+        executor.execute(CommandLine.parse("git clone -b " + branch + " " + repo.getAbsolutePath() + " ./"));
         return clone;
     }
 
-    private File createRemoteRepo( File basedir )
-        throws ExecuteException, IOException
-    {
-        File repo = new File( basedir, "repo.git" );
+    private File createRemoteRepo(File basedir) throws ExecuteException, IOException {
+        File repo = new File(basedir, "repo.git");
         repo.mkdir();
         Executor executor = new DefaultExecutor();
-        executor.setWorkingDirectory( repo );
-        executor.execute( CommandLine.parse( "git init --bare" ) );
+        executor.setWorkingDirectory(repo);
+        executor.execute(CommandLine.parse("git init --bare"));
         return repo;
     }
 

@@ -31,113 +31,102 @@ import org.slf4j.Logger;
 
 import com.github.jonasrutishauser.maven.wagon.git.util.LoggerProgressMonitor;
 
-@DisplayName( "LoggerProgressMontor" )
-public class LoggerProgressMonitorTest
-{
+@DisplayName("LoggerProgressMontor")
+public class LoggerProgressMonitorTest {
 
-    private final Logger logger = mock( Logger.class );
+    private final Logger logger = mock(Logger.class);
 
-    private final LoggerProgressMonitor testee = new LoggerProgressMonitor( logger );
+    private final LoggerProgressMonitor testee = new LoggerProgressMonitor(logger);
 
-    @DisplayName( "with debug disabled" )
+    @DisplayName("with debug disabled")
     @Nested
-    public class DebugDisabled
-    {
-        @Test
-        @DisplayName( "logs nothing onUpdate(String, int)" )
-        void nothingOnUpdate()
-        {
-            testee.onUpdate( "task", 42 );
+    public class DebugDisabled {
 
-            verify( logger, atLeast( 0 ) ).isDebugEnabled();
-            verifyNoMoreInteractions( logger );
+        @Test
+        @DisplayName("logs nothing onUpdate(String, int)")
+        void nothingOnUpdate() {
+            testee.onUpdate("task", 42);
+
+            verify(logger, atLeast(0)).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName( "logs nothing onUpdate(String, int, int, int)" )
-        void nothingOnUpdatePercent()
-        {
-            testee.onUpdate( "task", 42, 84, 50 );
+        @DisplayName("logs nothing onUpdate(String, int, int, int)")
+        void nothingOnUpdatePercent() {
+            testee.onUpdate("task", 42, 84, 50);
 
-            verify( logger, atLeast( 0 ) ).isDebugEnabled();
-            verifyNoMoreInteractions( logger );
+            verify(logger, atLeast(0)).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName( "logs nothing onEndTask(String, int)" )
-        void nothingOnEndTask()
-        {
-            testee.onEndTask( "task", 42 );
+        @DisplayName("logs nothing onEndTask(String, int)")
+        void nothingOnEndTask() {
+            testee.onEndTask("task", 42);
 
-            verify( logger, atLeast( 0 ) ).isDebugEnabled();
-            verifyNoMoreInteractions( logger );
+            verify(logger, atLeast(0)).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName( "logs nothing onEndTask(String, int, int, int)" )
-        void nothingOnEndTaskPercent()
-        {
-            testee.onEndTask( "task", 42, 84, 50 );
+        @DisplayName("logs nothing onEndTask(String, int, int, int)")
+        void nothingOnEndTaskPercent() {
+            testee.onEndTask("task", 42, 84, 50);
 
-            verify( logger, atLeast( 0 ) ).isDebugEnabled();
-            verifyNoMoreInteractions( logger );
+            verify(logger, atLeast(0)).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
         }
     }
 
-    @DisplayName( "with debug enabled" )
+    @DisplayName("with debug enabled")
     @Nested
-    public class DebugEnabled
-    {
+    public class DebugEnabled {
+
         @BeforeEach
-        void setDebugEnabled()
-        {
-            doReturn( Boolean.TRUE ).when( logger ).isDebugEnabled();
+        void setDebugEnabled() {
+            doReturn(Boolean.TRUE).when(logger).isDebugEnabled();
         }
 
         @Test
-        @DisplayName( "correct log onUpdate(String, int)" )
-        void onUpdate()
-        {
-            testee.onUpdate( "task", 3 );
+        @DisplayName("correct log onUpdate(String, int)")
+        void onUpdate() {
+            testee.onUpdate("task", 3);
 
-            verify( logger ).debug( "task:                   3" );
+            verify(logger).debug("task:                   3");
         }
 
         @Test
-        @DisplayName( "correct log onUpdate(String, int, int, int)" )
-        void onUpdatePercent()
-        {
-            testee.onUpdate( "foo", 2, 142, 5 );
+        @DisplayName("correct log onUpdate(String, int, int, int)")
+        void onUpdatePercent() {
+            testee.onUpdate("foo", 2, 142, 5);
 
-            verify( logger ).debug( "foo:                      5% (  2/142)" );
+            verify(logger).debug("foo:                      5% (  2/142)");
         }
 
         @Test
-        @DisplayName( "logs nothing onUpdate(String, int, int, int) if ended" )
-        void nothingOnUpdatePercentEnded()
-        {
-            testee.onUpdate( "task", 42, 42, 100 );
+        @DisplayName("logs nothing onUpdate(String, int, int, int) if ended")
+        void nothingOnUpdatePercentEnded() {
+            testee.onUpdate("task", 42, 42, 100);
 
-            verify( logger, atLeast( 0 ) ).isDebugEnabled();
-            verifyNoMoreInteractions( logger );
+            verify(logger, atLeast(0)).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName( "correct log onEndTask(String, int)" )
-        void onEndTask()
-        {
-            testee.onEndTask( "bar", 42 );
+        @DisplayName("correct log onEndTask(String, int)")
+        void onEndTask() {
+            testee.onEndTask("bar", 42);
 
-            verify( logger ).debug( "bar:                    42" );
+            verify(logger).debug("bar:                    42");
         }
 
         @Test
-        @DisplayName( "correct log onEndTask(String, int, int, int)" )
-        void onEndTaskPercent()
-        {
-            testee.onEndTask( "test", 42, 42, 100 );
+        @DisplayName("correct log onEndTask(String, int, int, int)")
+        void onEndTaskPercent() {
+            testee.onEndTask("test", 42, 42, 100);
 
-            verify( logger ).debug( "test:                   100% (42/42)" );
+            verify(logger).debug("test:                   100% (42/42)");
         }
     }
 

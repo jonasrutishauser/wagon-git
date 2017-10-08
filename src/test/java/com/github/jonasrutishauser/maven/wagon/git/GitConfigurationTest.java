@@ -41,118 +41,96 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-@DisplayName( "GitConfiguration" )
-public class GitConfigurationTest
-{
+@DisplayName("GitConfiguration")
+public class GitConfigurationTest {
 
-    private static class ValidParseArguments
-        implements ArgumentsProvider
-    {
+    private static class ValidParseArguments implements ArgumentsProvider {
 
-        private static final List<String> GIT_URLS =
-            Arrays.asList( "file:/repos/test", "ssh://git@github.com/jonasrutishauser/test.git",
-                           "git@github.com:jonasrutishauser/test.git" );
+        private static final List<String> GIT_URLS = Arrays.asList("file:/repos/test",
+                "ssh://git@github.com/jonasrutishauser/test.git", "git@github.com:jonasrutishauser/test.git");
 
-        private static final List<Optional<String>> BRANCHES =
-            Arrays.asList( Optional.empty(), Optional.of( "master" ), Optional.of( "gh-pages" ),
-                           Optional.of( "feature/test" ) );
+        private static final List<Optional<String>> BRANCHES = Arrays.asList(Optional.empty(), Optional.of("master"),
+                Optional.of("gh-pages"), Optional.of("feature/test"));
 
-        private static final List<Optional<Path>> PATHS =
-            Arrays.asList( Optional.empty(), Optional.of( Paths.get( "snapshot" ) ),
-                           Optional.of( Paths.get( "snapshot/test" ) ) );
+        private static final List<Optional<Path>> PATHS = Arrays.asList(Optional.empty(),
+                Optional.of(Paths.get("snapshot")), Optional.of(Paths.get("snapshot/test")));
 
         @Override
-        public Stream<? extends Arguments> provideArguments( ExtensionContext context )
-        {
-            return GIT_URLS.stream().flatMap( this::addBranch ).flatMap( this::addPaths ).flatMap( this::addInput );
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return GIT_URLS.stream().flatMap(this::addBranch).flatMap(this::addPaths).flatMap(this::addInput);
         }
 
-        private Stream<Object[]> addBranch( String gitUrl )
-        {
-            return BRANCHES.stream().map( branch -> new Object[] { gitUrl, branch } );
+        private Stream<Object[]> addBranch(String gitUrl) {
+            return BRANCHES.stream().map(branch -> new Object[] {gitUrl, branch});
         }
 
-        private Stream<Object[]> addPaths( Object[] arguments )
-        {
-            return PATHS.stream().map( path -> new Object[] { arguments[0], arguments[1], path } );
+        private Stream<Object[]> addPaths(Object[] arguments) {
+            return PATHS.stream().map(path -> new Object[] {arguments[0], arguments[1], path});
         }
 
-        private Stream<? extends Arguments> addInput( Object[] arguments )
-        {
+        private Stream<? extends Arguments> addInput(Object[] arguments) {
             Object gitUrl = arguments[0];
             Optional<?> branch = (Optional<?>) arguments[1];
             Optional<?> path = (Optional<?>) arguments[2];
-            StringBuilder url = new StringBuilder( "git:" );
-            url.append( gitUrl );
-            if ( branch.isPresent() )
-            {
-                url.append( '!' ).append( branch.get() );
+            StringBuilder url = new StringBuilder("git:");
+            url.append(gitUrl);
+            if (branch.isPresent()) {
+                url.append('!').append(branch.get());
             }
             List<String> urls = new ArrayList<>();
-            if ( path.isPresent() )
-            {
-                url.append( '!' );
+            if (path.isPresent()) {
+                url.append('!');
                 int offset = url.length();
-                url.append( path.get() );
-                urls.add( url.toString() );
-                urls.add( url.toString() + '/' );
-                url.insert( offset, '/' );
-                urls.add( url.toString() );
-                url.append( '/' );
-                urls.add( url.toString() );
-            }
-            else
-            {
-                if ( !branch.isPresent() )
-                {
-                    urls.add( url.toString() );
+                url.append(path.get());
+                urls.add(url.toString());
+                urls.add(url.toString() + '/');
+                url.insert(offset, '/');
+                urls.add(url.toString());
+                url.append('/');
+                urls.add(url.toString());
+            } else {
+                if (!branch.isPresent()) {
+                    urls.add(url.toString());
                 }
-                url.append( '!' );
-                urls.add( url.toString() );
-                url.append( '/' );
-                urls.add( url.toString() );
+                url.append('!');
+                urls.add(url.toString());
+                url.append('/');
+                urls.add(url.toString());
             }
-            url.insert( 4, "//foo/" );
-            urls.add( url.toString() );
-            return urls.stream().map( input -> Arguments.of( input, gitUrl, branch, path ) );
+            url.insert(4, "//foo/");
+            urls.add(url.toString());
+            return urls.stream().map(input -> Arguments.of(input, gitUrl, branch, path));
         }
     }
 
-    @DisplayName( "parse()" )
-    @ParameterizedTest( name = "{0} => gitUrl={1}, branch={2}, path={3}" )
-    @ArgumentsSource( ValidParseArguments.class )
-    void parse( String url, String gitUrl, Optional<String> branch, Optional<Path> path )
-    {
-        GitConfiguration configuration = GitConfiguration.parse( url );
+    @DisplayName("parse()")
+    @ParameterizedTest(name = "{0} => gitUrl={1}, branch={2}, path={3}")
+    @ArgumentsSource(ValidParseArguments.class)
+    void parse(String url, String gitUrl, Optional<String> branch, Optional<Path> path) {
+        GitConfiguration configuration = GitConfiguration.parse(url);
 
-        assertAll( () -> assertEquals( gitUrl, configuration.getUrl() ),
-                   () -> assertEquals( branch, configuration.getBranch() ),
-                   () -> assertEquals( path, configuration.getPath() ) );
+        assertAll(() -> assertEquals(gitUrl, configuration.getUrl()),
+                () -> assertEquals(branch, configuration.getBranch()),
+                () -> assertEquals(path, configuration.getPath()));
     }
 
-    @DisplayName( "parse() of invalid url" )
-    @ParameterizedTest( name = "{0}" )
-    @ValueSource( strings = { "file:/repos/test", "git:http://foo.bar/test.git!!" } )
-    void parse_invalid( String url )
-    {
-        assertThrows( IllegalArgumentException.class, () -> GitConfiguration.parse( url ) );
+    @DisplayName("parse() of invalid url")
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {"file:/repos/test", "git:http://foo.bar/test.git!!"})
+    void parse_invalid(String url) {
+        assertThrows(IllegalArgumentException.class, () -> GitConfiguration.parse(url));
     }
 
     @Test
-    @DisplayName( "getWorkingDirectory() returns allways the same directory" )
-    void getWorkingDirectory_returnsAllwaysTheSame()
-        throws IOException
-    {
-        GitConfiguration testee = GitConfiguration.parse( "git:foo" );
+    @DisplayName("getWorkingDirectory() returns allways the same directory")
+    void getWorkingDirectory_returnsAllwaysTheSame() throws IOException {
+        GitConfiguration testee = GitConfiguration.parse("git:foo");
 
         Path workingDirectory = testee.getWorkingDirectory();
-        try
-        {
-            assertSame( workingDirectory, testee.getWorkingDirectory() );
-        }
-        finally
-        {
-            Files.delete( workingDirectory );
+        try {
+            assertSame(workingDirectory, testee.getWorkingDirectory());
+        } finally {
+            Files.delete(workingDirectory);
         }
     }
 

@@ -17,15 +17,12 @@ package com.github.jonasrutishauser.maven.wagon.git.exception;
  * If not, see <http://www.gnu.org/licenses/lgpl-3.0.txt>.
  */
 
-public class GitCloneException
-    extends GitException
-{
+public class GitCloneException extends GitException {
 
     private static final long serialVersionUID = 1L;
 
-    public GitCloneException( String message, Throwable cause )
-    {
-        super( message, cause );
+    public GitCloneException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

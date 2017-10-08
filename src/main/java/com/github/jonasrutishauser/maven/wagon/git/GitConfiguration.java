@@ -25,14 +25,13 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GitConfiguration
-{
+public class GitConfiguration {
 
     /**
      * URL format: git:(//[identifier]/)?[url]((![branch])?!/?[path])?
      */
-    private static final Pattern URL_PATTERN =
-        Pattern.compile( "git:(//[^/]+/)?(?<url>[^!]+)((!(?<branch>[^!]+))?!/?(?<path>[^!]+)?)?" );
+    private static final Pattern URL_PATTERN = Pattern
+            .compile("git:(//[^/]+/)?(?<url>[^!]+)((!(?<branch>[^!]+))?!/?(?<path>[^!]+)?)?");
 
     private final String url;
 
@@ -42,45 +41,36 @@ public class GitConfiguration
 
     private Path workingDirectory;
 
-    private GitConfiguration( String url, Optional<String> branch, Optional<Path> path )
-    {
+    private GitConfiguration(String url, Optional<String> branch, Optional<Path> path) {
         this.url = url;
         this.branch = branch;
         this.path = path;
     }
 
-    public static GitConfiguration parse( String url )
-    {
-        Matcher matcher = URL_PATTERN.matcher( url );
-        if ( !matcher.matches() )
-        {
-            throw new IllegalArgumentException( "URL not valid" );
+    public static GitConfiguration parse(String url) {
+        Matcher matcher = URL_PATTERN.matcher(url);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("URL not valid");
         }
-        return new GitConfiguration( matcher.group( "url" ), Optional.ofNullable( matcher.group( "branch" ) ),
-                                     Optional.ofNullable( matcher.group( "path" ) ).map( Paths::get ) );
+        return new GitConfiguration(matcher.group("url"), Optional.ofNullable(matcher.group("branch")),
+                Optional.ofNullable(matcher.group("path")).map(Paths::get));
     }
 
-    public String getUrl()
-    {
+    public String getUrl() {
         return url;
     }
 
-    public Optional<String> getBranch()
-    {
+    public Optional<String> getBranch() {
         return branch;
     }
 
-    public Optional<Path> getPath()
-    {
+    public Optional<Path> getPath() {
         return path;
     }
 
-    public Path getWorkingDirectory()
-        throws IOException
-    {
-        if ( workingDirectory == null )
-        {
-            workingDirectory = Files.createTempDirectory( "wagon-git-" );
+    public Path getWorkingDirectory() throws IOException {
+        if (workingDirectory == null) {
+            workingDirectory = Files.createTempDirectory("wagon-git-");
         }
         return workingDirectory;
     }

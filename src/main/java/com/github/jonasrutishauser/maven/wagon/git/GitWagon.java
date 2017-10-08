@@ -34,101 +34,73 @@ import com.github.jonasrutishauser.maven.wagon.git.exception.GitException;
 import com.github.jonasrutishauser.maven.wagon.git.exception.GitPushException;
 import com.github.jonasrutishauser.maven.wagon.git.exception.NoSuchResourceInGitException;
 
-public class GitWagon
-    extends AbstractWagon
-{
+public class GitWagon extends AbstractWagon {
 
     private GitConnection connection;
 
     @Override
-    protected void openConnectionInternal()
-        throws ConnectionException, AuthenticationException
-    {
-        GitConfiguration configuration = GitConfiguration.parse( getRepository().getUrl() );
-        try
-        {
-            connection = openGitConnection( configuration );
-        }
-        catch ( GitCloneException e )
-        {
-            throw new ConnectionException( "failed to open a git connection: " + e.getMessage(), e );
-        }
-        catch ( GitAuthenticationException e )
-        {
-            throw new AuthenticationException( e.getMessage(), e );
+    protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
+        GitConfiguration configuration = GitConfiguration.parse(getRepository().getUrl());
+        try {
+            connection = openGitConnection(configuration);
+        } catch (GitCloneException e) {
+            throw new ConnectionException("failed to open a git connection: " + e.getMessage(), e);
+        } catch (GitAuthenticationException e) {
+            throw new AuthenticationException(e.getMessage(), e);
         }
     }
 
-    GitConnection openGitConnection( GitConfiguration configuration )
-        throws GitCloneException, GitAuthenticationException
-    {
-        return GitConnection.open( configuration, Optional.ofNullable( getAuthenticationInfo().getUserName() ),
-                                   Optional.ofNullable( getAuthenticationInfo().getPassword() ) );
+    GitConnection openGitConnection(GitConfiguration configuration)
+            throws GitCloneException, GitAuthenticationException {
+        return GitConnection.open(configuration, Optional.ofNullable(getAuthenticationInfo().getUserName()),
+                Optional.ofNullable(getAuthenticationInfo().getPassword()));
     }
 
     @Override
-    protected void closeConnection()
-        throws ConnectionException
-    {
-        try
-        {
+    protected void closeConnection() throws ConnectionException {
+        try {
             connection.close();
-        }
-        catch ( GitPushException | GitAuthenticationException e )
-        {
-            throw new ConnectionException( "failed to close the git connection: " + e.getMessage(), e );
+        } catch (GitPushException | GitAuthenticationException e) {
+            throw new ConnectionException("failed to close the git connection: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void get( String resourceName, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        getIfNewer( resourceName, destination, Long.MIN_VALUE );
+    public void get(String resourceName, File destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        getIfNewer(resourceName, destination, Long.MIN_VALUE);
     }
 
     @Override
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        try
-        {
-            return connection.getIfNewer( Paths.get( resourceName ), destination.toPath(), timestamp );
-        }
-        catch ( NoSuchResourceInGitException e )
-        {
-            throw new ResourceDoesNotExistException( "resource does not exist in git: " + e.getMessage(), e );
-        }
-        catch ( GitException e )
-        {
-            throw new TransferFailedException( "failed to get git resource: " + e.getMessage(), e );
+    public boolean getIfNewer(String resourceName, File destination, long timestamp)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+            return connection.getIfNewer(Paths.get(resourceName), destination.toPath(), timestamp);
+        } catch (NoSuchResourceInGitException e) {
+            throw new ResourceDoesNotExistException("resource does not exist in git: " + e.getMessage(), e);
+        } catch (GitException e) {
+            throw new TransferFailedException("failed to get git resource: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void put( File source, String destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        try
-        {
-            connection.put( source.toPath(), Paths.get( destination ));
-        }
-        catch ( GitException e )
-        {
-            throw new TransferFailedException( "failed to put git resource: " + e.getMessage(), e );
+    public void put(File source, String destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+            connection.put(source.toPath(), Paths.get(destination));
+        } catch (GitException e) {
+            throw new TransferFailedException("failed to put git resource: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        put( sourceDirectory, destinationDirectory );
+    public void putDirectory(File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        put(sourceDirectory, destinationDirectory);
     }
 
     @Override
-    public boolean supportsDirectoryCopy()
-    {
+    public boolean supportsDirectoryCopy() {
         return true;
     }
 
