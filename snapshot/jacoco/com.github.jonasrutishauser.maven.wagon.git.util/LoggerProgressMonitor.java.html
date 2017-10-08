@@ -21,61 +21,49 @@ import org.eclipse.jgit.lib.BatchingProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoggerProgressMonitor
-    extends BatchingProgressMonitor
-{
+public class LoggerProgressMonitor extends BatchingProgressMonitor {
 
     private final Logger logger;
 
-    public LoggerProgressMonitor()
-    {
-<span class="fc" id="L32">        this( LoggerFactory.getLogger( LoggerProgressMonitor.class ) );</span>
-<span class="fc" id="L33">    }</span>
+    public LoggerProgressMonitor() {
+<span class="fc" id="L29">        this(LoggerFactory.getLogger(LoggerProgressMonitor.class));</span>
+<span class="fc" id="L30">    }</span>
 
-    LoggerProgressMonitor( Logger logger )
-<span class="fc" id="L36">    {</span>
-<span class="fc" id="L37">        this.logger = logger;</span>
-<span class="fc" id="L38">    }</span>
+<span class="fc" id="L32">    LoggerProgressMonitor(Logger logger) {</span>
+<span class="fc" id="L33">        this.logger = logger;</span>
+<span class="fc" id="L34">    }</span>
 
     @Override
-    protected void onUpdate( String taskName, int workCurr )
-    {
-<span class="fc bfc" id="L43" title="All 2 branches covered.">        if ( logger.isDebugEnabled() )</span>
-        {
-<span class="fc" id="L45">            logger.debug( String.format( &quot;%-24s%s&quot;, taskName + &quot;: &quot;, Integer.valueOf( workCurr ) ) );</span>
+    protected void onUpdate(String taskName, int workCurr) {
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (logger.isDebugEnabled()) {</span>
+<span class="fc" id="L39">            logger.debug(String.format(&quot;%-24s%s&quot;, taskName + &quot;: &quot;, Integer.valueOf(workCurr)));</span>
         }
-<span class="fc" id="L47">    }</span>
+<span class="fc" id="L41">    }</span>
 
     @Override
-    protected void onEndTask( String taskName, int workCurr )
-    {
-<span class="fc bfc" id="L52" title="All 2 branches covered.">        if ( logger.isDebugEnabled() )</span>
-        {
-<span class="fc" id="L54">            logger.debug( String.format( &quot;%-24s%s&quot;, taskName + &quot;: &quot;, Integer.valueOf( workCurr ) ) );</span>
+    protected void onEndTask(String taskName, int workCurr) {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (logger.isDebugEnabled()) {</span>
+<span class="fc" id="L46">            logger.debug(String.format(&quot;%-24s%s&quot;, taskName + &quot;: &quot;, Integer.valueOf(workCurr)));</span>
         }
-<span class="fc" id="L56">    }</span>
+<span class="fc" id="L48">    }</span>
 
     @Override
-    protected void onUpdate( String taskName, int workCurr, int workTotal, int percentDone )
-    {
-<span class="fc bfc" id="L61" title="All 4 branches covered.">        if ( logger.isDebugEnabled() &amp;&amp; workCurr != workTotal )</span>
-        {
-<span class="fc" id="L63">            String total = String.valueOf( workTotal );</span>
-<span class="fc" id="L64">            logger.debug( String.format( &quot;%-24s%3s%% (%&quot; + total.length() + &quot;s/%s)&quot;, taskName + &quot;: &quot;,</span>
-<span class="fc" id="L65">                                         Integer.valueOf( percentDone ), Integer.valueOf( workCurr ), total ) );</span>
+    protected void onUpdate(String taskName, int workCurr, int workTotal, int percentDone) {
+<span class="fc bfc" id="L52" title="All 4 branches covered.">        if (logger.isDebugEnabled() &amp;&amp; workCurr != workTotal) {</span>
+<span class="fc" id="L53">            String total = String.valueOf(workTotal);</span>
+<span class="fc" id="L54">            logger.debug(String.format(&quot;%-24s%3s%% (%&quot; + total.length() + &quot;s/%s)&quot;, taskName + &quot;: &quot;,</span>
+<span class="fc" id="L55">                    Integer.valueOf(percentDone), Integer.valueOf(workCurr), total));</span>
         }
-<span class="fc" id="L67">    }</span>
+<span class="fc" id="L57">    }</span>
 
     @Override
-    protected void onEndTask( String taskName, int workCurr, int workTotal, int percentDone )
-    {
-<span class="fc bfc" id="L72" title="All 2 branches covered.">        if ( logger.isDebugEnabled() )</span>
-        {
-<span class="fc" id="L74">            String total = String.valueOf( workTotal );</span>
-<span class="fc" id="L75">            logger.debug( String.format( &quot;%-24s%3s%% (%&quot; + total.length() + &quot;s/%s)&quot;, taskName + &quot;: &quot;,</span>
-<span class="fc" id="L76">                                         Integer.valueOf( percentDone ), Integer.valueOf( workCurr ), total ) );</span>
+    protected void onEndTask(String taskName, int workCurr, int workTotal, int percentDone) {
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (logger.isDebugEnabled()) {</span>
+<span class="fc" id="L62">            String total = String.valueOf(workTotal);</span>
+<span class="fc" id="L63">            logger.debug(String.format(&quot;%-24s%3s%% (%&quot; + total.length() + &quot;s/%s)&quot;, taskName + &quot;: &quot;,</span>
+<span class="fc" id="L64">                    Integer.valueOf(percentDone), Integer.valueOf(workCurr), total));</span>
         }
-<span class="fc" id="L78">    }</span>
+<span class="fc" id="L66">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

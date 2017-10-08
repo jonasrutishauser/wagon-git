@@ -34,102 +34,74 @@ import com.github.jonasrutishauser.maven.wagon.git.exception.GitException;
 import com.github.jonasrutishauser.maven.wagon.git.exception.GitPushException;
 import com.github.jonasrutishauser.maven.wagon.git.exception.NoSuchResourceInGitException;
 
-<span class="fc" id="L37">public class GitWagon</span>
-    extends AbstractWagon
-{
+<span class="fc" id="L37">public class GitWagon extends AbstractWagon {</span>
 
     private GitConnection connection;
 
     @Override
-    protected void openConnectionInternal()
-        throws ConnectionException, AuthenticationException
-    {
-<span class="fc" id="L47">        GitConfiguration configuration = GitConfiguration.parse( getRepository().getUrl() );</span>
-        try
-        {
-<span class="fc" id="L50">            connection = openGitConnection( configuration );</span>
-        }
-<span class="fc" id="L52">        catch ( GitCloneException e )</span>
-        {
-<span class="fc" id="L54">            throw new ConnectionException( &quot;failed to open a git connection: &quot; + e.getMessage(), e );</span>
-        }
-<span class="fc" id="L56">        catch ( GitAuthenticationException e )</span>
-        {
-<span class="fc" id="L58">            throw new AuthenticationException( e.getMessage(), e );</span>
-<span class="fc" id="L59">        }</span>
-<span class="fc" id="L60">    }</span>
+    protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
+<span class="fc" id="L43">        GitConfiguration configuration = GitConfiguration.parse(getRepository().getUrl());</span>
+        try {
+<span class="fc" id="L45">            connection = openGitConnection(configuration);</span>
+<span class="fc" id="L46">        } catch (GitCloneException e) {</span>
+<span class="fc" id="L47">            throw new ConnectionException(&quot;failed to open a git connection: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L48">        } catch (GitAuthenticationException e) {</span>
+<span class="fc" id="L49">            throw new AuthenticationException(e.getMessage(), e);</span>
+<span class="fc" id="L50">        }</span>
+<span class="fc" id="L51">    }</span>
 
-    GitConnection openGitConnection( GitConfiguration configuration )
-        throws GitCloneException, GitAuthenticationException
-    {
-<span class="nc" id="L65">        return GitConnection.open( configuration, Optional.ofNullable( getAuthenticationInfo().getUserName() ),</span>
-<span class="nc" id="L66">                                   Optional.ofNullable( getAuthenticationInfo().getPassword() ) );</span>
+    GitConnection openGitConnection(GitConfiguration configuration)
+            throws GitCloneException, GitAuthenticationException {
+<span class="nc" id="L55">        return GitConnection.open(configuration, Optional.ofNullable(getAuthenticationInfo().getUserName()),</span>
+<span class="nc" id="L56">                Optional.ofNullable(getAuthenticationInfo().getPassword()));</span>
     }
 
     @Override
-    protected void closeConnection()
-        throws ConnectionException
-    {
-        try
-        {
-<span class="fc" id="L75">            connection.close();</span>
-        }
-<span class="fc" id="L77">        catch ( GitPushException | GitAuthenticationException e )</span>
-        {
-<span class="fc" id="L79">            throw new ConnectionException( &quot;failed to close the git connection: &quot; + e.getMessage(), e );</span>
-<span class="fc" id="L80">        }</span>
-<span class="fc" id="L81">    }</span>
+    protected void closeConnection() throws ConnectionException {
+        try {
+<span class="fc" id="L62">            connection.close();</span>
+<span class="fc" id="L63">        } catch (GitPushException | GitAuthenticationException e) {</span>
+<span class="fc" id="L64">            throw new ConnectionException(&quot;failed to close the git connection: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L65">        }</span>
+<span class="fc" id="L66">    }</span>
 
     @Override
-    public void get( String resourceName, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-<span class="fc" id="L87">        getIfNewer( resourceName, destination, Long.MIN_VALUE );</span>
-<span class="fc" id="L88">    }</span>
+    public void get(String resourceName, File destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+<span class="fc" id="L71">        getIfNewer(resourceName, destination, Long.MIN_VALUE);</span>
+<span class="fc" id="L72">    }</span>
 
     @Override
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        try
-        {
-<span class="fc" id="L96">            return connection.getIfNewer( Paths.get( resourceName ), destination.toPath(), timestamp );</span>
-        }
-<span class="fc" id="L98">        catch ( NoSuchResourceInGitException e )</span>
-        {
-<span class="fc" id="L100">            throw new ResourceDoesNotExistException( &quot;resource does not exist in git: &quot; + e.getMessage(), e );</span>
-        }
-<span class="fc" id="L102">        catch ( GitException e )</span>
-        {
-<span class="fc" id="L104">            throw new TransferFailedException( &quot;failed to get git resource: &quot; + e.getMessage(), e );</span>
+    public boolean getIfNewer(String resourceName, File destination, long timestamp)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+<span class="fc" id="L78">            return connection.getIfNewer(Paths.get(resourceName), destination.toPath(), timestamp);</span>
+<span class="fc" id="L79">        } catch (NoSuchResourceInGitException e) {</span>
+<span class="fc" id="L80">            throw new ResourceDoesNotExistException(&quot;resource does not exist in git: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L81">        } catch (GitException e) {</span>
+<span class="fc" id="L82">            throw new TransferFailedException(&quot;failed to get git resource: &quot; + e.getMessage(), e);</span>
         }
     }
 
     @Override
-    public void put( File source, String destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        try
-        {
-<span class="fc" id="L114">            connection.put( source.toPath(), Paths.get( destination ));</span>
-        }
-<span class="fc" id="L116">        catch ( GitException e )</span>
-        {
-<span class="fc" id="L118">            throw new TransferFailedException( &quot;failed to put git resource: &quot; + e.getMessage(), e );</span>
-<span class="fc" id="L119">        }</span>
-<span class="fc" id="L120">    }</span>
+    public void put(File source, String destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+<span class="fc" id="L90">            connection.put(source.toPath(), Paths.get(destination));</span>
+<span class="fc" id="L91">        } catch (GitException e) {</span>
+<span class="fc" id="L92">            throw new TransferFailedException(&quot;failed to put git resource: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L93">        }</span>
+<span class="fc" id="L94">    }</span>
 
     @Override
-    public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-<span class="fc" id="L126">        put( sourceDirectory, destinationDirectory );</span>
-<span class="fc" id="L127">    }</span>
+    public void putDirectory(File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+<span class="fc" id="L99">        put(sourceDirectory, destinationDirectory);</span>
+<span class="fc" id="L100">    }</span>
 
     @Override
-    public boolean supportsDirectoryCopy()
-    {
-<span class="fc" id="L132">        return true;</span>
+    public boolean supportsDirectoryCopy() {
+<span class="fc" id="L104">        return true;</span>
     }
 
 }
