@@ -39,7 +39,6 @@ import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ProgressMonitor;
@@ -109,10 +108,9 @@ public class GitConnection implements AutoCloseable {
         return new GitConnection(git, credentialsProvider, configuration.getPath().orElse(Paths.get("")));
     }
 
-    public boolean getIfNewer(Path resource, Path destination, long timestamp)
-            throws NoSuchResourceInGitException, GitException {
+    public boolean getIfNewer(Path resource, Path destination, long timestamp) throws GitException {
         Path realResource = workingDirectory.resolve(resource);
-        if (!Files.exists(realResource)) {
+        if (!realResource.toFile().exists()) {
             throw new NoSuchResourceInGitException("resource '" + realResource + "' does not exist");
         }
         if (getCommitTime(realResource) <= timestamp) {
@@ -129,7 +127,7 @@ public class GitConnection implements AutoCloseable {
     public void put(Path source, Path destination) throws GitException {
         Path realDestination = workingDirectory.resolve(destination).normalize();
         try {
-            if (!Files.isDirectory(workingDirectory)) {
+            if (!workingDirectory.toFile().isDirectory()) {
                 Files.createDirectories(workingDirectory);
             }
             copy(source, realDestination, StandardCopyOption.REPLACE_EXISTING);
@@ -158,7 +156,7 @@ public class GitConnection implements AutoCloseable {
     }
 
     private void copy(Path source, Path destination, CopyOption... copyOptions) throws IOException {
-        if (Files.isDirectory(source)) {
+        if (source.toFile().isDirectory()) {
             copyDirectory(source, destination, copyOptions);
         } else {
             Files.copy(source, destination, copyOptions);
@@ -171,7 +169,7 @@ public class GitConnection implements AutoCloseable {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 Path targetDir = destination.resolve(source.relativize(dir));
-                if (!Files.isDirectory(targetDir)) {
+                if (!targetDir.toFile().isDirectory()) {
                     Files.createDirectory(targetDir);
                 }
                 return FileVisitResult.CONTINUE;
@@ -246,17 +244,15 @@ public class GitConnection implements AutoCloseable {
         RemoteAddCommand remoteAdd = git.remoteAdd();
         remoteAdd.setName(Constants.DEFAULT_REMOTE_NAME);
         remoteAdd.setUri(new URIish(url));
-        RemoteConfig remoteConfig = remoteAdd.call();
-        return remoteConfig;
+        return remoteAdd.call();
     }
 
-    private static boolean remoteHasBranch(Git git, String branch)
-            throws GitAPIException, InvalidRemoteException, TransportException {
+    private static boolean remoteHasBranch(Git git, String branch) throws GitAPIException {
         return git.lsRemote().callAsMap().containsKey(Constants.R_HEADS + branch);
     }
 
     private static void fetchAndCheckoutBranch(Git git, String branch, RemoteConfig remoteConfig,
-            CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
+            CredentialsProvider credentialsProvider) throws GitAPIException {
         RefSpec refSpec = remoteConfig.getFetchRefSpecs().get(0).expandFromSource(Constants.R_HEADS + branch);
         FetchCommand fetchCommand = git.fetch().setCredentialsProvider(credentialsProvider);
         fetchCommand.setRefSpecs(refSpec).setProgressMonitor(getProgressMonitor()).call();

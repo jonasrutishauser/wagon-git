@@ -38,6 +38,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -47,6 +49,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.junit.jupiter.api.DisplayName;
@@ -391,8 +394,7 @@ public class GitConnectionTest {
         addFooFileToRepo(tempDir, pathInRepo, Optional.empty());
         GitConnection testee = createTestee(configuration);
         Path target = tempDir.resolve("foo");
-        long timestamp = Instant.now().getEpochSecond();
-        Thread.sleep(1000);
+        long timestamp = Instant.now().getEpochSecond() - 10;
 
         boolean result = testee.getIfNewer(Paths.get("foo"), target, timestamp);
 
@@ -405,12 +407,12 @@ public class GitConnectionTest {
     void getIfNewer_newerFile_trueAndCopy(Optional<Path> pathInRepo, Optional<String> branch, @Root Path tempDir)
             throws IOException, GitException {
         GitConfiguration configuration = createConfiguration(createRemoteRepo(tempDir), tempDir, pathInRepo, branch);
-        long timestamp = Instant.now().getEpochSecond();
+        long timestamp = Instant.parse("2005-04-07T22:13:13Z").getEpochSecond() - 1;
         addFooFileToRepo(tempDir, pathInRepo, branch);
         GitConnection testee = createTestee(configuration);
         Path target = tempDir.resolve("foo");
 
-        boolean result = testee.getIfNewer(Paths.get("foo"), target, timestamp - 1);
+        boolean result = testee.getIfNewer(Paths.get("foo"), target, timestamp);
 
         assertTrue(result && Files.exists(target));
     }
@@ -453,7 +455,10 @@ public class GitConnectionTest {
         Files.write(otherWorkingDir.resolve(pathInRepo.orElse(Paths.get(""))).resolve("foo"), Arrays.asList("test"),
                 StandardCharsets.UTF_8);
         executor.execute(CommandLine.parse("git add ."));
-        executor.execute(CommandLine.parse("git commit -m 'test'"));
+        Map<String, String> env = new HashMap<>();
+        env.putAll(EnvironmentUtils.getProcEnvironment());
+        env.put("GIT_COMMITTER_DATE", "2005-04-07T22:13:13Z");
+        executor.execute(CommandLine.parse("git commit -m 'test'"), env);
         executor.execute(CommandLine.parse("git push origin master:" + branch.orElse("master")));
     }
 
