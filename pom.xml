@@ -17,7 +17,7 @@
 	<description>Wagon Provider that gets and puts artifacts using a Git SCM repository</description>
 
 	<properties>
-		<jgit.version>4.8.0.201706111038-r</jgit.version>
+		<jgit.version>5.1.0.201809111528-r</jgit.version>
 		<junit-jupiter.version>5.0.0</junit-jupiter.version>
 		<junit-platform.version>1.0.0</junit-platform.version>
 		<wagon.git.version>${project.version}</wagon.git.version>
@@ -127,7 +127,7 @@
 				<version>1.13.1</version>
 				<executions>
 					<execution>
-						<?m2e ignore ?>
+						<?m2e ignore?>
 						<phase>process-test-resources</phase>
 						<goals>
 							<goal>testProperties</goal>
