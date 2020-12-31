@@ -24,7 +24,7 @@ jobs:
       - name: Setup Git
         run: mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts && git config --global user.email "jonas.rutishauser@alumni.ethz.ch" && git config --global user.name "Jonas Rutishauser"
       - name: Build with Maven
-        run: mvn -B -V -e verify
+        run: mvn -B -V -e install
       - name: Deploy Site
         if: ${{ matrix.java == '1.8' }}
         run: mvn -B -e site-deploy
