@@ -220,6 +220,9 @@ public class GitConnection implements AutoCloseable {
     }
 
     private static void deleteWorkTree(File workTree) {
+        if (!workTree.exists()) {
+            return;
+        }
         try {
             Files.walkFileTree(workTree.toPath(), new SimpleFileVisitor<Path>() {
 
