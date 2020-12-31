@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.jonasrutishauser</groupId>
 		<artifactId>parent</artifactId>
-		<version>8</version>
+		<version>9</version>
 	</parent>
 
 	<groupId>com.github.jonasrutishauser.maven.wagon</groupId>
@@ -18,16 +18,17 @@
 
 	<properties>
 		<jgit.version>5.1.0.201809111528-r</jgit.version>
-		<junit-jupiter.version>5.0.0</junit-jupiter.version>
-		<junit-platform.version>1.0.0</junit-platform.version>
+		<junit-jupiter.version>5.7.0</junit-jupiter.version>
+		<junit-platform.version>1.7.0</junit-platform.version>
 		<wagon.git.version>${project.version}</wagon.git.version>
+		<scm_url>https://github.com/jonasrutishauser/${root.artifactId}</scm_url>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven.wagon</groupId>
 			<artifactId>wagon-provider-api</artifactId>
-			<version>3.0.0</version>
+			<version>3.4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
@@ -62,14 +63,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
-			<version>1.3</version>
+			<artifactId>hamcrest</artifactId>
+			<version>2.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>2.10.0</version>
+			<version>3.6.28</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -81,7 +82,7 @@
 		<dependency>
 			<groupId>io.takari.maven.plugins</groupId>
 			<artifactId>takari-plugin-integration-testing</artifactId>
-			<version>2.9.1</version>
+			<version>3.0.0</version>
 			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
@@ -99,6 +100,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-launcher</artifactId>
 			<version>${junit-platform.version}</version>
@@ -109,22 +116,12 @@
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>com.github.jonasrutishauser.org.junit.platform</groupId>
-						<artifactId>junit-platform-surefire-provider</artifactId>
-						<version>${junit-platform.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
 				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>io.takari.maven.plugins</groupId>
 				<artifactId>takari-lifecycle-plugin</artifactId>
-				<version>1.13.1</version>
+				<version>2.0.0</version>
 				<executions>
 					<execution>
 						<?m2e ignore?>
@@ -154,7 +151,7 @@
 	<scm>
 		<connection>${scm.connection}</connection>
 		<developerConnection>${scm.developerConnection}</developerConnection>
-		<url>${scm.url}</url>
+		<url>${scm_url}</url>
 		<tag>HEAD</tag>
 	</scm>
 

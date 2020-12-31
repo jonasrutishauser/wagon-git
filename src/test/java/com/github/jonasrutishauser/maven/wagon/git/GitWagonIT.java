@@ -38,7 +38,7 @@ import io.takari.maven.testing.executor.MavenVersions;
 import io.takari.maven.testing.executor.junit.MavenJUnitTestRunner;
 
 @RunWith(MavenJUnitTestRunner.class)
-@MavenVersions({"3.3.3", "3.3.9", "3.5.0"})
+@MavenVersions({"3.5.0", "3.6.3"})
 public class GitWagonIT {
 
     @Rule
