@@ -522,7 +522,7 @@ public class GitConnectionTest {
 
     private Executor createExecutor() {
         DefaultExecutor executor = new DefaultExecutor();
-        executor.setStreamHandler(new PumpStreamHandler(null));
+        executor.setStreamHandler(new PumpStreamHandler(System.out));
         return executor;
     }
 
