@@ -220,52 +220,55 @@ public class GitConnection implements AutoCloseable {
 <span class="fc" id="L220">    }</span>
 
     private static void deleteWorkTree(File workTree) {
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if (!workTree.exists()) {</span>
+<span class="nc" id="L224">            return;</span>
+        }
         try {
-<span class="fc" id="L224">            Files.walkFileTree(workTree.toPath(), new SimpleFileVisitor&lt;Path&gt;() {</span>
+<span class="fc" id="L227">            Files.walkFileTree(workTree.toPath(), new SimpleFileVisitor&lt;Path&gt;() {</span>
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-<span class="fc" id="L228">                    Files.delete(file);</span>
-<span class="fc" id="L229">                    return FileVisitResult.CONTINUE;</span>
+<span class="fc" id="L231">                    Files.delete(file);</span>
+<span class="fc" id="L232">                    return FileVisitResult.CONTINUE;</span>
                 }
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-<span class="fc" id="L234">                    Files.delete(dir);</span>
-<span class="fc" id="L235">                    return FileVisitResult.CONTINUE;</span>
+<span class="fc" id="L237">                    Files.delete(dir);</span>
+<span class="fc" id="L238">                    return FileVisitResult.CONTINUE;</span>
                 }
             });
-<span class="nc" id="L238">        } catch (IOException e) {</span>
-<span class="nc" id="L239">            LOGGER.warn(&quot;failed to delete closed local repository: &quot; + e.getMessage(), e);</span>
-<span class="fc" id="L240">        }</span>
-<span class="fc" id="L241">    }</span>
+<span class="nc" id="L241">        } catch (IOException e) {</span>
+<span class="nc" id="L242">            LOGGER.warn(&quot;failed to delete closed local repository: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L243">        }</span>
+<span class="fc" id="L244">    }</span>
 
     private static RemoteConfig setRemote(String url, Git git) throws URISyntaxException, GitAPIException {
-<span class="fc" id="L244">        RemoteAddCommand remoteAdd = git.remoteAdd();</span>
-<span class="fc" id="L245">        remoteAdd.setName(Constants.DEFAULT_REMOTE_NAME);</span>
-<span class="fc" id="L246">        remoteAdd.setUri(new URIish(url));</span>
-<span class="fc" id="L247">        return remoteAdd.call();</span>
+<span class="fc" id="L247">        RemoteAddCommand remoteAdd = git.remoteAdd();</span>
+<span class="fc" id="L248">        remoteAdd.setName(Constants.DEFAULT_REMOTE_NAME);</span>
+<span class="fc" id="L249">        remoteAdd.setUri(new URIish(url));</span>
+<span class="fc" id="L250">        return remoteAdd.call();</span>
     }
 
     private static boolean remoteHasBranch(Git git, String branch) throws GitAPIException {
-<span class="fc" id="L251">        return git.lsRemote().callAsMap().containsKey(Constants.R_HEADS + branch);</span>
+<span class="fc" id="L254">        return git.lsRemote().callAsMap().containsKey(Constants.R_HEADS + branch);</span>
     }
 
     private static void fetchAndCheckoutBranch(Git git, String branch, RemoteConfig remoteConfig,
             CredentialsProvider credentialsProvider) throws GitAPIException {
-<span class="fc" id="L256">        RefSpec refSpec = remoteConfig.getFetchRefSpecs().get(0).expandFromSource(Constants.R_HEADS + branch);</span>
-<span class="fc" id="L257">        FetchCommand fetchCommand = git.fetch().setCredentialsProvider(credentialsProvider);</span>
-<span class="fc" id="L258">        fetchCommand.setRefSpecs(refSpec).setProgressMonitor(getProgressMonitor()).call();</span>
-<span class="fc" id="L259">        git.checkout().setName(branch).setCreateBranch(true).setStartPoint(refSpec.getDestination()).call();</span>
-<span class="fc" id="L260">    }</span>
+<span class="fc" id="L259">        RefSpec refSpec = remoteConfig.getFetchRefSpecs().get(0).expandFromSource(Constants.R_HEADS + branch);</span>
+<span class="fc" id="L260">        FetchCommand fetchCommand = git.fetch().setCredentialsProvider(credentialsProvider);</span>
+<span class="fc" id="L261">        fetchCommand.setRefSpecs(refSpec).setProgressMonitor(getProgressMonitor()).call();</span>
+<span class="fc" id="L262">        git.checkout().setName(branch).setCreateBranch(true).setStartPoint(refSpec.getDestination()).call();</span>
+<span class="fc" id="L263">    }</span>
 
     private static boolean isAuthenticationFailureMessage(String message) {
-<span class="nc bnc" id="L263" title="All 4 branches missed.">        return message.contains(&quot;CredentialsProvider&quot;) || message.toLowerCase().contains(&quot;auth&quot;);</span>
+<span class="nc bnc" id="L266" title="All 4 branches missed.">        return message.contains(&quot;CredentialsProvider&quot;) || message.toLowerCase().contains(&quot;auth&quot;);</span>
     }
 
     private static ProgressMonitor getProgressMonitor() {
-<span class="fc" id="L267">        return new LoggerProgressMonitor();</span>
+<span class="fc" id="L270">        return new LoggerProgressMonitor();</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

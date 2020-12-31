@@ -3,10 +3,10 @@ Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git.util,LoggerProgre
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git.exception,NoSuchResourceInGitException,0,4,0,0,0,2,0,1,0,1
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git.exception,GitCloneException,0,5,0,0,0,2,0,1,0,1
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git.exception,GitPushException,0,9,0,0,0,4,0,2,0,2
-Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git.exception,GitException,0,9,0,0,0,4,0,2,0,2
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git.exception,GitAuthenticationException,0,5,0,0,0,2,0,1,0,1
+Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git.exception,GitException,0,9,0,0,0,4,0,2,0,2
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git,GitConfiguration,0,71,0,4,0,18,0,10,0,8
-Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git,GitConnection,15,548,0,36,2,102,0,36,0,18
+Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git,GitConnection,28,541,0,38,4,102,0,37,0,18
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git,GitWagon,11,139,0,0,2,29,1,8,1,8
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git,GitConnection.new SimpleFileVisitor() {...},0,48,0,2,0,7,0,4,0,3
 Git Wagon Provider,com.github.jonasrutishauser.maven.wagon.git,GitConnection.new SimpleFileVisitor() {...},0,11,0,0,0,5,0,3,0,3
