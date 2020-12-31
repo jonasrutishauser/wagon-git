@@ -21,8 +21,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-      - name: Setup SSH Hostkey
-        run: mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Setup Git
+        run: mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts && git config --global user.email "jonas.rutishauser@alumni.ethz.ch" && git config --global user.name "Jonas Rutishauser"
       - name: Build with Maven
         run: mvn -B -V -e verify
       - name: Deploy Site
