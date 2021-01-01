@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.jonasrutishauser</groupId>
 		<artifactId>parent</artifactId>
-		<version>9</version>
+		<version>10</version>
 	</parent>
 
 	<groupId>com.github.jonasrutishauser.maven.wagon</groupId>
@@ -21,7 +21,6 @@
 		<junit-jupiter.version>5.7.0</junit-jupiter.version>
 		<junit-platform.version>1.7.0</junit-platform.version>
 		<wagon.git.version>${project.version}</wagon.git.version>
-		<scm_url>https://github.com/jonasrutishauser/${root.artifactId}</scm_url>
 	</properties>
 
 	<dependencies>
