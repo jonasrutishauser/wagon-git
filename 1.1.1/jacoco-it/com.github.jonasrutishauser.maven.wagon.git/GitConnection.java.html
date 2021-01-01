@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GitConnection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Git Wagon Provider</a> &gt; <a href="index.source.html" class="el_package">com.github.jonasrutishauser.maven.wagon.git</a> &gt; <span class="el_source">GitConnection.java</span></div><h1>GitConnection.java</h1><pre class="source lang-java linenums">package com.github.jonasrutishauser.maven.wagon.git;
+
+/*
+ * Copyright (C) 2017 Jonas Rutishauser
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation version 3 of the License.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.
+ * If not, see &lt;http://www.gnu.org/licenses/lgpl-3.0.txt&gt;.
+ */
+
+import static org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.CopyOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.util.Optional;
+
+import org.eclipse.jgit.api.FetchCommand;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LogCommand;
+import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.RemoteAddCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ProgressMonitor;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitAuthenticationException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitCloneException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitPushException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.NoSuchResourceInGitException;
+import com.github.jonasrutishauser.maven.wagon.git.util.LoggerProgressMonitor;
+
+public class GitConnection implements AutoCloseable {
+
+<span class="fc" id="L65">    private static final Logger LOGGER = LoggerFactory.getLogger(GitConnection.class);</span>
+
+    private final Git git;
+
+    private final CredentialsProvider credentialsProvider;
+
+    private final Path workingDirectory;
+
+<span class="fc" id="L73">    private GitConnection(Git git, CredentialsProvider credentialsProvider, Path pathInWorkingDirectory) {</span>
+<span class="fc" id="L74">        this.git = git;</span>
+<span class="fc" id="L75">        this.credentialsProvider = credentialsProvider;</span>
+<span class="fc" id="L76">        this.workingDirectory = git.getRepository().getWorkTree().toPath().resolve(pathInWorkingDirectory);</span>
+<span class="fc" id="L77">    }</span>
+
+    public static GitConnection open(GitConfiguration configuration, Optional&lt;String&gt; username,
+            Optional&lt;String&gt; password) throws GitCloneException, GitAuthenticationException {
+<span class="fc" id="L81">        String branch = configuration.getBranch().orElse(Constants.MASTER);</span>
+<span class="fc" id="L82">        CredentialsProvider credentialsProvider = null;</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if (username.isPresent()) {</span>
+<span class="nc" id="L84">            credentialsProvider = new UsernamePasswordCredentialsProvider(username.get(),</span>
+<span class="nc" id="L85">                    password.map(String::toCharArray).orElse(null));</span>
+        }
+<span class="fc" id="L87">        File workingDirectory = null;</span>
+        Git git;
+        try {
+<span class="fc" id="L90">            workingDirectory = configuration.getWorkingDirectory().toFile();</span>
+<span class="fc" id="L91">            git = Git.init().setDirectory(workingDirectory).call();</span>
+<span class="fc" id="L92">            RemoteConfig remoteConfig = setRemote(configuration.getUrl(), git);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">            if (remoteHasBranch(git, branch)) {</span>
+<span class="fc" id="L94">                fetchAndCheckoutBranch(git, branch, remoteConfig, credentialsProvider);</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            } else if (configuration.getBranch().isPresent()) {</span>
+<span class="fc" id="L96">                git.checkout().setName(branch).setOrphan(true).call();</span>
+            }
+<span class="nc" id="L98">        } catch (GitAPIException | IOException | URISyntaxException e) {</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if (workingDirectory != null) {</span>
+<span class="nc" id="L100">                deleteWorkTree(workingDirectory);</span>
+            }
+<span class="nc bnc" id="L102" title="All 4 branches missed.">            if (e instanceof TransportException &amp;&amp; isAuthenticationFailureMessage(e.getMessage())) {</span>
+<span class="nc" id="L103">                throw new GitAuthenticationException(&quot;invalid credentials for repository: &quot; + configuration.getUrl(),</span>
+                        e);
+            }
+<span class="nc" id="L106">            throw new GitCloneException(&quot;failed to clone from remote repository: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L107">        }</span>
+<span class="fc" id="L108">        return new GitConnection(git, credentialsProvider, configuration.getPath().orElse(Paths.get(&quot;&quot;)));</span>
+    }
+
+    public boolean getIfNewer(Path resource, Path destination, long timestamp) throws GitException {
+<span class="nc" id="L112">        Path realResource = workingDirectory.resolve(resource);</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (!realResource.toFile().exists()) {</span>
+<span class="nc" id="L114">            throw new NoSuchResourceInGitException(&quot;resource '&quot; + realResource + &quot;' does not exist&quot;);</span>
+        }
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (getCommitTime(realResource) &lt;= timestamp) {</span>
+<span class="nc" id="L117">            return false;</span>
+        }
+        try {
+<span class="nc" id="L120">            copy(realResource, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);</span>
+<span class="nc" id="L121">        } catch (IOException e) {</span>
+<span class="nc" id="L122">            throw new GitException(&quot;failed to read resource: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L123">        }</span>
+<span class="nc" id="L124">        return true;</span>
+    }
+
+    public void put(Path source, Path destination) throws GitException {
+<span class="fc" id="L128">        Path realDestination = workingDirectory.resolve(destination).normalize();</span>
+        try {
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (!workingDirectory.toFile().isDirectory()) {</span>
+<span class="fc" id="L131">                Files.createDirectories(workingDirectory);</span>
+            }
+<span class="fc" id="L133">            copy(source, realDestination, StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc" id="L134">        } catch (IOException e) {</span>
+<span class="nc" id="L135">            throw new GitException(&quot;failed to write resource: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L136">        }</span>
+        try {
+<span class="fc" id="L138">            git.add().addFilepattern(getRepoPath(realDestination)).call();</span>
+<span class="nc" id="L139">        } catch (GitAPIException e) {</span>
+<span class="nc" id="L140">            throw new GitException(&quot;failed to write resource: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L141">        }</span>
+<span class="fc" id="L142">    }</span>
+
+    @Override
+    public void close() throws GitPushException, GitAuthenticationException {
+        try {
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">            if (needsPush()) {</span>
+<span class="fc" id="L148">                pushChanges();</span>
+            }
+<span class="nc" id="L150">        } catch (GitAPIException e) {</span>
+<span class="nc" id="L151">            throw new GitPushException(&quot;failed to push all changes to the remote repository: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L152">        }</span>
+<span class="fc" id="L153">        File workTree = git.getRepository().getWorkTree();</span>
+<span class="fc" id="L154">        git.close();</span>
+<span class="fc" id="L155">        deleteWorkTree(workTree);</span>
+<span class="fc" id="L156">    }</span>
+
+    private void copy(Path source, Path destination, CopyOption... copyOptions) throws IOException {
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (source.toFile().isDirectory()) {</span>
+<span class="fc" id="L160">            copyDirectory(source, destination, copyOptions);</span>
+        } else {
+<span class="nc" id="L162">            Files.copy(source, destination, copyOptions);</span>
+        }
+<span class="fc" id="L164">    }</span>
+
+    private void copyDirectory(Path source, Path destination, CopyOption... copyOptions) throws IOException {
+<span class="fc" id="L167">        Files.walkFileTree(source, new SimpleFileVisitor&lt;Path&gt;() {</span>
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+<span class="fc" id="L171">                Path targetDir = destination.resolve(source.relativize(dir));</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">                if (!targetDir.toFile().isDirectory()) {</span>
+<span class="fc" id="L173">                    Files.createDirectory(targetDir);</span>
+                }
+<span class="fc" id="L175">                return FileVisitResult.CONTINUE;</span>
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+<span class="fc" id="L180">                Files.copy(file, destination.resolve(source.relativize(file)), copyOptions);</span>
+<span class="fc" id="L181">                return FileVisitResult.CONTINUE;</span>
+            }
+        });
+<span class="fc" id="L184">    }</span>
+
+    private long getCommitTime(Path realResource) throws GitException {
+<span class="nc" id="L187">        LogCommand logCommand = git.log().addPath(getRepoPath(realResource)).setMaxCount(1);</span>
+<span class="nc" id="L188">        long commitTime = Instant.now().getEpochSecond();</span>
+        try {
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            for (RevCommit commit : logCommand.call()) {</span>
+<span class="nc" id="L191">                commitTime = commit.getCommitTime();</span>
+<span class="nc" id="L192">            }</span>
+<span class="nc" id="L193">        } catch (GitAPIException e) {</span>
+<span class="nc" id="L194">            throw new GitException(&quot;failed to get git history&quot;, e);</span>
+<span class="nc" id="L195">        }</span>
+<span class="nc" id="L196">        return commitTime;</span>
+    }
+
+    private String getRepoPath(Path realPath) {
+<span class="fc" id="L200">        String path = git.getRepository().getWorkTree().toPath().relativize(realPath).toString();</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        return path.isEmpty() ? &quot;.&quot; : path;</span>
+    }
+
+    private boolean needsPush() throws GitAPIException {
+<span class="fc" id="L205">        return git.status().call().hasUncommittedChanges();</span>
+    }
+
+    private void pushChanges() throws GitAPIException, GitPushException {
+<span class="fc" id="L209">        git.commit().setMessage(&quot;[wagon-git] adding files to repository&quot;).call();</span>
+<span class="fc" id="L210">        PushCommand pushCommand = git.push().setCredentialsProvider(credentialsProvider);</span>
+<span class="fc" id="L211">        pushCommand.setProgressMonitor(getProgressMonitor());</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        for (PushResult result : pushCommand.call()) {</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">            for (RemoteRefUpdate update : result.getRemoteUpdates()) {</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">                if (update.getStatus() != OK) {</span>
+<span class="nc" id="L215">                    throw new GitPushException(</span>
+<span class="nc" id="L216">                            &quot;failed to push all changes to the remote repository: &quot; + update.getStatus());</span>
+                }
+<span class="fc" id="L218">            }</span>
+<span class="fc" id="L219">        }</span>
+<span class="fc" id="L220">    }</span>
+
+    private static void deleteWorkTree(File workTree) {
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if (!workTree.exists()) {</span>
+<span class="nc" id="L224">            return;</span>
+        }
+        try {
+<span class="fc" id="L227">            Files.walkFileTree(workTree.toPath(), new SimpleFileVisitor&lt;Path&gt;() {</span>
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+<span class="fc" id="L231">                    Files.delete(file);</span>
+<span class="fc" id="L232">                    return FileVisitResult.CONTINUE;</span>
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+<span class="fc" id="L237">                    Files.delete(dir);</span>
+<span class="fc" id="L238">                    return FileVisitResult.CONTINUE;</span>
+                }
+            });
+<span class="nc" id="L241">        } catch (IOException e) {</span>
+<span class="nc" id="L242">            LOGGER.warn(&quot;failed to delete closed local repository: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L243">        }</span>
+<span class="fc" id="L244">    }</span>
+
+    private static RemoteConfig setRemote(String url, Git git) throws URISyntaxException, GitAPIException {
+<span class="fc" id="L247">        RemoteAddCommand remoteAdd = git.remoteAdd();</span>
+<span class="fc" id="L248">        remoteAdd.setName(Constants.DEFAULT_REMOTE_NAME);</span>
+<span class="fc" id="L249">        remoteAdd.setUri(new URIish(url));</span>
+<span class="fc" id="L250">        return remoteAdd.call();</span>
+    }
+
+    private static boolean remoteHasBranch(Git git, String branch) throws GitAPIException {
+<span class="fc" id="L254">        return git.lsRemote().callAsMap().containsKey(Constants.R_HEADS + branch);</span>
+    }
+
+    private static void fetchAndCheckoutBranch(Git git, String branch, RemoteConfig remoteConfig,
+            CredentialsProvider credentialsProvider) throws GitAPIException {
+<span class="fc" id="L259">        RefSpec refSpec = remoteConfig.getFetchRefSpecs().get(0).expandFromSource(Constants.R_HEADS + branch);</span>
+<span class="fc" id="L260">        FetchCommand fetchCommand = git.fetch().setCredentialsProvider(credentialsProvider);</span>
+<span class="fc" id="L261">        fetchCommand.setRefSpecs(refSpec).setProgressMonitor(getProgressMonitor()).call();</span>
+<span class="fc" id="L262">        git.checkout().setName(branch).setCreateBranch(true).setStartPoint(refSpec.getDestination()).call();</span>
+<span class="fc" id="L263">    }</span>
+
+    private static boolean isAuthenticationFailureMessage(String message) {
+<span class="nc bnc" id="L266" title="All 4 branches missed.">        return message.contains(&quot;CredentialsProvider&quot;) || message.toLowerCase().contains(&quot;auth&quot;);</span>
+    }
+
+    private static ProgressMonitor getProgressMonitor() {
+<span class="fc" id="L270">        return new LoggerProgressMonitor();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

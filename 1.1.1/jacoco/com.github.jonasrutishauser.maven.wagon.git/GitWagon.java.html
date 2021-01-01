@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GitWagon.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Git Wagon Provider</a> &gt; <a href="index.source.html" class="el_package">com.github.jonasrutishauser.maven.wagon.git</a> &gt; <span class="el_source">GitWagon.java</span></div><h1>GitWagon.java</h1><pre class="source lang-java linenums">package com.github.jonasrutishauser.maven.wagon.git;
+
+/*
+ * Copyright (C) 2017 Jonas Rutishauser
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation version 3 of the License.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.
+ * If not, see &lt;http://www.gnu.org/licenses/lgpl-3.0.txt&gt;.
+ */
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.Optional;
+
+import org.apache.maven.wagon.AbstractWagon;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitAuthenticationException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitCloneException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.GitPushException;
+import com.github.jonasrutishauser.maven.wagon.git.exception.NoSuchResourceInGitException;
+
+<span class="fc" id="L37">public class GitWagon extends AbstractWagon {</span>
+
+    private GitConnection connection;
+
+    @Override
+    protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
+<span class="fc" id="L43">        GitConfiguration configuration = GitConfiguration.parse(getRepository().getUrl());</span>
+        try {
+<span class="fc" id="L45">            connection = openGitConnection(configuration);</span>
+<span class="fc" id="L46">        } catch (GitCloneException e) {</span>
+<span class="fc" id="L47">            throw new ConnectionException(&quot;failed to open a git connection: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L48">        } catch (GitAuthenticationException e) {</span>
+<span class="fc" id="L49">            throw new AuthenticationException(e.getMessage(), e);</span>
+<span class="fc" id="L50">        }</span>
+<span class="fc" id="L51">    }</span>
+
+    GitConnection openGitConnection(GitConfiguration configuration)
+            throws GitCloneException, GitAuthenticationException {
+<span class="nc" id="L55">        return GitConnection.open(configuration, Optional.ofNullable(getAuthenticationInfo().getUserName()),</span>
+<span class="nc" id="L56">                Optional.ofNullable(getAuthenticationInfo().getPassword()));</span>
+    }
+
+    @Override
+    protected void closeConnection() throws ConnectionException {
+        try {
+<span class="fc" id="L62">            connection.close();</span>
+<span class="fc" id="L63">        } catch (GitPushException | GitAuthenticationException e) {</span>
+<span class="fc" id="L64">            throw new ConnectionException(&quot;failed to close the git connection: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L65">        }</span>
+<span class="fc" id="L66">    }</span>
+
+    @Override
+    public void get(String resourceName, File destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+<span class="fc" id="L71">        getIfNewer(resourceName, destination, Long.MIN_VALUE);</span>
+<span class="fc" id="L72">    }</span>
+
+    @Override
+    public boolean getIfNewer(String resourceName, File destination, long timestamp)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+<span class="fc" id="L78">            return connection.getIfNewer(Paths.get(resourceName), destination.toPath(), timestamp);</span>
+<span class="fc" id="L79">        } catch (NoSuchResourceInGitException e) {</span>
+<span class="fc" id="L80">            throw new ResourceDoesNotExistException(&quot;resource does not exist in git: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L81">        } catch (GitException e) {</span>
+<span class="fc" id="L82">            throw new TransferFailedException(&quot;failed to get git resource: &quot; + e.getMessage(), e);</span>
+        }
+    }
+
+    @Override
+    public void put(File source, String destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+<span class="fc" id="L90">            connection.put(source.toPath(), Paths.get(destination));</span>
+<span class="fc" id="L91">        } catch (GitException e) {</span>
+<span class="fc" id="L92">            throw new TransferFailedException(&quot;failed to put git resource: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L93">        }</span>
+<span class="fc" id="L94">    }</span>
+
+    @Override
+    public void putDirectory(File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+<span class="fc" id="L99">        put(sourceDirectory, destinationDirectory);</span>
+<span class="fc" id="L100">    }</span>
+
+    @Override
+    public boolean supportsDirectoryCopy() {
+<span class="fc" id="L104">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
