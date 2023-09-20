@@ -17,7 +17,7 @@
 	<description>Wagon Provider that gets and puts artifacts using a Git SCM repository</description>
 
 	<properties>
-		<jgit.version>5.1.0.201809111528-r</jgit.version>
+		<jgit.version>6.6.1.202309021850-r</jgit.version>
 		<junit-jupiter.version>5.7.0</junit-jupiter.version>
 		<junit-platform.version>1.7.0</junit-platform.version>
 		<wagon.git.version>${project.version}</wagon.git.version>
